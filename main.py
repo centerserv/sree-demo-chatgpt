@@ -9,23 +9,50 @@ from permanence import PermanenceValidator
 from logic import LogicValidator
 from trust_update import update_trust
 
-def run_demo(X, y):
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-    pattern = PatternValidator(); presence = PresenceValidator()
-    permanence = PermanenceValidator(); logic = LogicValidator()
+def run_demo(X, y, name, best_params):
+    # split once
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=0.2, random_state=42
+    )
+    # init validators
+    pattern   = PatternValidator()
+    presence  = PresenceValidator()
+    permanence= PermanenceValidator()
+    logic     = LogicValidator()
 
-    # tune and get best params (alpha/beta/gamma/delta)
-    best = update_trust(X_test, y_test, pattern, presence, permanence, logic)
-    print("Best params:", best)
+    # run PPP loop with your tuned params
+    history = update_trust(
+        X_test, y_test,
+        pattern, presence, permanence, logic,
+        iterations=10,
+        alpha=best_params["alpha"],
+        beta= best_params["beta"],
+        gamma=best_params["gamma"],
+        delta=best_params["delta"]
+    )
 
-    # then re-run PPP loop with those params and print final metrics (omitted for brevity)
+    acc = history["accuracy"][-1]
+    trust = history["T"][-1]
+    print(f"{name}: Accuracy={acc:.3f}, Trust={trust:.3f}")
 
-if __name__=="__main__":
-    # Example on Heart CSV
+if __name__ == "__main__":
+    # Example on Heart CSV (replace with your own dataset path)
     df = pd.read_csv("data/heart_disease_dataset_new.csv")
-    run_demo(df.drop(columns=["target"]).values, df["target"].values)
+    heart_params = {
+        "alpha": 0.19899969870482181,
+        "beta":  0.3023754795178367,
+        "gamma": 0.15131886131549113,
+        "delta": 0.24770213456675536
+    }
+    run_demo(df.drop(columns=["target"]).values, df["target"].values, "Heart Dataset", heart_params)
 
     # Example on MNIST-784
     mn = fetch_openml("mnist_784", version=1)
-    run_demo(mn.data.values, mn.target.astype(int).values)
+    mnist_params = {
+        "alpha": 0.19899969870482181,
+        "beta":  0.3023754795178367,
+        "gamma": 0.15131886131549113,
+        "delta": 0.24770213456675536
+    }
+    run_demo(mn.data.values, mn.target.astype(int).values, "MNIST-784", mnist_params)
 
