@@ -12,6 +12,34 @@ if __name__ == "__main__":
     # 1. Load and preprocess UCI Heart Failure data
     df = pd.read_csv("data/heart_failure.csv")
     df = clean_df(df, target_col="DEATH_EVENT")
+
+    # ——— Insert here ———
+    # Preprocessing flag stats
+    n = len(df)
+    print("\nPreprocessing statistics:")
+    for col in df.columns:
+        if col == "DEATH_EVENT":
+            continue
+        vals = set(df[col].dropna().unique())
+        # only continuous columns
+        if vals <= {0, 1}:
+            continue
+        zeros = (df[col] == 0).sum()
+        low, high = df[col].quantile([0.01, 0.99])
+        clipped = ((df[col] < low) | (df[col] > high)).sum()
+        print(f"  {col:25s} zeros_replaced={zeros:4d} ({zeros/n*100:4.1f}%), "
+              f"clipped={clipped:4d} ({clipped/n*100:4.1f}%)")
+
+    # SMOTE synthetic count
+    counts = df["DEATH_EVENT"].value_counts()
+    maj, min_ = counts.max(), counts.min()
+    if abs(counts.mean() - 0.5) > 0.1:
+        synth = maj - min_
+        print(f"\nSMOTE: synthetic_samples={synth} ({synth/n*100:.1f}% of rows)\n")
+    else:
+        print("\nSMOTE: no oversampling needed (class balance OK)\n")
+    # ——— End insert ———
+
     X = df.drop(columns=["DEATH_EVENT"]).values
     y = df["DEATH_EVENT"].values
 
@@ -36,7 +64,7 @@ if __name__ == "__main__":
         pattern, presence, permanence, logic,
         iterations=50,
         alpha=tuned_params["alpha"],
-        beta= tuned_params["beta"],
+        beta=tuned_params["beta"],
         gamma=tuned_params["gamma"],
         delta=tuned_params["delta"]
     )
