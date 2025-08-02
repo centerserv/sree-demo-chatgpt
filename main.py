@@ -41,8 +41,13 @@ if __name__ == "__main__":
         delta=tuned_params["delta"]
     )
 
-    # 4. Print final metrics
-    acc   = history["accuracy"][-1]
-    trust = history["T"][-1]
-    print(f"UCI Heart Failure: Accuracy={acc:.3f}, Trust={trust:.3f}")
+    # 4. Print per-iteration self-refinement
+    print("\nSelf-refinement per iteration:")
+    for i, (acc, t) in enumerate(zip(history["accuracy"], history["T"]), start=1):
+        print(f"Iteration {i:02d}: Accuracy={acc:.3f}, Trust={t:.3f}")
+
+    # 5. Print final metrics
+    final_acc   = history["accuracy"][-1]
+    final_trust = history["T"][-1]
+    print(f"\nFinal UCI Heart Failure: Accuracy={final_acc:.3f}, Trust={final_trust:.3f}")
 
