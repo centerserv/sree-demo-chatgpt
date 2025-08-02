@@ -1,9 +1,15 @@
+# pattern.py
 from sklearn.neural_network import MLPClassifier
-from sklearn.model_selection import train_test_split
 
 class PatternValidator:
     def __init__(self):
-        self.model = MLPClassifier(hidden_layer_sizes=(100,), max_iter=200)
+        # Increased iterations, fixed seed, LBFGS solver for small data
+        self.model = MLPClassifier(
+            hidden_layer_sizes=(100,),
+            max_iter=500,
+            solver='lbfgs',
+            random_state=42
+        )
 
     def fit(self, X, y):
         self.model.fit(X, y)
