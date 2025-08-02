@@ -3,16 +3,22 @@ from sklearn.preprocessing import StandardScaler
 from imblearn.over_sampling import SMOTE
 
 def clean_df(df, target_col):
-    # 1. Median‐impute zeros and NaNs
+    # 1. Median‐impute zeros and NaNs on non-binary columns
     for col in df.columns:
         if col == target_col:
             continue
-        med = df.loc[df[col] != 0, col].median()
+        unique_vals = set(df[col].dropna().unique())
+        if unique_vals <= {0, 1}:
+            continue
+        med = df.loc[(df[col] != 0) & df[col].notna(), col].median()
         df[col] = df[col].replace(0, med).fillna(med)
 
-    # 2. Clip outliers to the 1–99 percentile range
+    # 2. Clip outliers to the 1–99 percentile range on non-binary columns
     for col in df.columns:
         if col == target_col:
+            continue
+        unique_vals = set(df[col].dropna().unique())
+        if unique_vals <= {0, 1}:
             continue
         low, high = df[col].quantile([0.01, 0.99])
         df[col] = df[col].clip(low, high)
