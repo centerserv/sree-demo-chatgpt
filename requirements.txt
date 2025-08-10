@@ -1,0 +1,8 @@
+streamlit==1.36.0
+numpy
+pandas
+scikit-learn
+scipy
+optuna
+imbalanced-learn
+
