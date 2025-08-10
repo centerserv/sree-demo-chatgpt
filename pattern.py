@@ -3,7 +3,7 @@ from sklearn.neural_network import MLPClassifier
 
 class PatternValidator:
     def __init__(self):
-        # Increased iterations and stable solver for better convergence on small datasets
+        # Use LBFGS solver and 500 iterations for stable convergence on small data
         self.model = MLPClassifier(
             hidden_layer_sizes=(100,),
             max_iter=500,
@@ -15,8 +15,7 @@ class PatternValidator:
         self.model.fit(X, y)
 
     def validate(self, X, y):
-        preds   = self.model.predict(X)
-        probs   = self.model.predict_proba(X)
+        preds = self.model.predict(X)
+        probs = self.model.predict_proba(X)
         accuracy = (preds == y).mean()
         return preds, probs, accuracy
-
